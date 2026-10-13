@@ -1,0 +1,7 @@
+{
+  "name": "AuraEstates - Modern Real Estate Platform",
+  "description": "Production-ready real estate web application featuring Neon PostgreSQL, property search and filtering, inquiry management, and a secure admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
