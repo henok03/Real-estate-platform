@@ -80,6 +80,7 @@ export interface PropertyInquiry {
   status?: 'new' | 'read' | 'replied' | 'closed';
   created_at: string;
   updated_at?: string;
+  is_read?: boolean;
   property_title?: string;
 }
 

@@ -39,7 +39,9 @@ export async function generateMetadata({
   const property = await getPropertyById(id);
   if (!property) return { title: 'Residence Not Found | Aura Estates' };
 
-  const location = [property.city, property.state, property.country].filter(Boolean).join(', ');
+ const location = [property.city, property.country]
+  .filter(Boolean)
+  .join(', ');
 
   return {
     title: `${property.title} | Aura Estates`,
@@ -61,7 +63,7 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
   const property = await getPropertyById(id);
   if (!property) notFound();
 
-  const fullLocation = [property.address, property.city, property.state, property.zip_code, property.country]
+  const fullLocation = [property.address, property.city, property.country]
     .filter(Boolean)
     .join(', ');
 

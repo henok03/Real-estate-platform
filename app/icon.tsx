@@ -1,5 +1,7 @@
 
 import { ImageResponse } from 'next/og';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 export const size = {
   width: 32,
@@ -9,28 +11,39 @@ export const size = {
 export const contentType = 'image/png';
 
 export default async function Icon() {
-  const logoUrl = new URL(
-    '/images/logo.png',
-    'http://localhost:3000'
+  const logoPath = path.join(
+    process.cwd(),
+    'public',
+    'images',
+    'logo.png'
   );
 
-  const response = await fetch(logoUrl);
-
-  if (!response.ok) {
-    throw new Error('Could not load /images/logo.png');
-  }
-
-  const logoBuffer = await response.arrayBuffer();
+  const logoBuffer = await fs.readFile(logoPath);
+  const logoBase64 = logoBuffer.toString('base64');
 
   return new ImageResponse(
     (
-      <img
-        src={`data:image/png;base64,${Buffer.from(logoBuffer).toString('base64')}`}
-        width="32"
-        height="32"
-        style={{ objectFit: 'contain' }}
-      />
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'white',
+        }}
+      >
+        <img
+  src={`data:image/png;base64,${logoBase64}`}
+  alt=""
+  width="32"
+  height="32"
+  style={{ objectFit: 'contain' }}
+/>
+      </div>
     ),
-    { ...size }
+    {
+      ...size,
+    }
   );
 }
