@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getDashboardStats, getPropertyInquiries, getContactMessages } from '@/lib/db';
-import { formatCurrency } from '@/components/property/PropertyCard';
+
 
 export const dynamic = 'force-dynamic';
 
