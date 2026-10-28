@@ -844,6 +844,7 @@ export async function createPropertyInquiry(data: {
   email: string;
   phone?: string | null;
   message: string;
+  
 }): Promise<PropertyInquiry> {
   const sql = getSql();
   if (sql) {
