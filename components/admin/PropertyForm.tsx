@@ -3,6 +3,24 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+
+import dynamic from 'next/dynamic';
+
+// Leaflet accesses browser APIs such as `window`, so load the map only in the browser.
+const PropertyLocationPicker = dynamic(
+  () =>
+    import('@/components/admin/PropertyLocationPicker').then(
+      (module) => module.PropertyLocationPicker
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-64 items-center justify-center rounded-xl bg-zinc-100 text-sm text-zinc-500">
+        Loading map...
+      </div>
+    ),
+  }
+);
 import {
   Save,
   Plus,
@@ -52,9 +70,9 @@ export function PropertyForm({ initialProperty, agents: initialAgents }: Propert
   const [squareFeet, setSquareFeet] = useState(initialProperty?.square_feet?.toString() || '');
   const [address, setAddress] = useState(initialProperty?.address || '');
   const [city, setCity] = useState(initialProperty?.city || '');
-  const [state, setState] = useState(initialProperty?.state || '');
-  const [country, setCountry] = useState(initialProperty?.country || 'United States');
-  const [zipCode, setZipCode] = useState(initialProperty?.zip_code || '');
+
+  const [country, setCountry] = useState(initialProperty?.country || 'Ethiopia');
+  
   const [latitude, setLatitude] = useState(initialProperty?.latitude?.toString() || '');
   const [longitude, setLongitude] = useState(initialProperty?.longitude?.toString() || '');
   const [agentId, setAgentId] = useState<string>(initialProperty?.agent_id?.toString() || '');
@@ -163,9 +181,9 @@ export function PropertyForm({ initialProperty, agents: initialAgents }: Propert
           square_feet: squareFeet ? parseInt(squareFeet, 10) : null,
           address: address.trim(),
           city: city.trim(),
-          state: state.trim(),
+        
           country: country.trim(),
-          zip_code: zipCode.trim(),
+          
           latitude: latitude ? parseFloat(latitude) : null,
           longitude: longitude ? parseFloat(longitude) : null,
           agent_id: agentId && agentId.trim() !== '' ? agentId.trim() : null,
@@ -206,19 +224,7 @@ export function PropertyForm({ initialProperty, agents: initialAgents }: Propert
           </div>
         </div>
 
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isPending}
-          className="bg-zinc-900 text-white hover:bg-zinc-800 gap-2 shadow"
-        >
-          {isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4" />
-          )}
-          <span>{initialProperty ? 'Save Changes' : 'Create Residence'}</span>
-        </Button>
+      
       </div>
 
       {error && (
@@ -259,10 +265,10 @@ export function PropertyForm({ initialProperty, agents: initialAgents }: Propert
                 id="prop-price"
                 type="number"
                 min="0"
-                step="1000"
+              
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                placeholder="e.g. 4500000"
+                placeholder="e.g. 4500"
                 required
                 className="mt-1"
               />
@@ -278,15 +284,16 @@ export function PropertyForm({ initialProperty, agents: initialAgents }: Propert
                 onChange={(e) => setPropertyType(e.target.value as PropertyType)}
                 className="mt-1 flex h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
               >
-                <option value="single_family">Single Family Home</option>
-                <option value="villa">Private Villa</option>
-                <option value="condo">Condominium</option>
-                <option value="apartment">Apartment / Penthouse</option>
-                <option value="townhouse">Townhouse</option>
-                <option value="land">Land</option>
-                <option value="commercial">Commercial</option>
-                <option value="office">Office</option>
-                <option value="other">Other</option>
+               <option value="single_family">House</option>
+<option value="villa">Villa</option>
+<option value="apartment">Apartment</option>
+
+<option value="land">Land / Plot</option>
+<option value="commercial_building">Commercial Building</option>
+<option value="office">Office</option>
+<option value="shop">Shop</option>
+<option value="building">Whole Building</option>
+<option value="other">Other</option>
               </select>
             </div>
 
@@ -309,14 +316,7 @@ export function PropertyForm({ initialProperty, agents: initialAgents }: Propert
             <div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="prop-agent">Assigned Broker / Agent</Label>
-                <button
-                  type="button"
-                  onClick={() => setShowAgentModal(true)}
-                  className="text-xs text-amber-600 hover:underline flex items-center gap-1"
-                >
-                  <UserPlus className="h-3.5 w-3.5" />
-                  <span>+ Quick Add Agent</span>
-                </button>
+               
               </div>
               <select
                 id="prop-agent"
@@ -416,27 +416,8 @@ export function PropertyForm({ initialProperty, agents: initialAgents }: Propert
               />
             </div>
 
-            <div>
-              <Label htmlFor="prop-state">State / Province</Label>
-              <Input
-                id="prop-state"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                placeholder="e.g. CA"
-                className="mt-1"
-              />
-            </div>
 
-            <div>
-              <Label htmlFor="prop-zip">ZIP / Postal Code</Label>
-              <Input
-                id="prop-zip"
-                value={zipCode}
-                onChange={(e) => setZipCode(e.target.value)}
-                placeholder="e.g. 90077"
-                className="mt-1"
-              />
-            </div>
+          
 
             <div>
               <Label htmlFor="prop-country">Country</Label>
@@ -449,31 +430,18 @@ export function PropertyForm({ initialProperty, agents: initialAgents }: Propert
               />
             </div>
 
-            <div>
-              <Label htmlFor="prop-lat">Latitude (Optional)</Label>
-              <Input
-                id="prop-lat"
-                type="number"
-                step="any"
-                value={latitude}
-                onChange={(e) => setLatitude(e.target.value)}
-                placeholder="e.g. 34.0837"
-                className="mt-1"
-              />
-            </div>
+            
+<div className="md:col-span-3">
+  <PropertyLocationPicker
+    latitude={latitude}
+    longitude={longitude}
+    onLocationChange={(lat, lng) => {
+      setLatitude(lat);
+      setLongitude(lng);
+    }}
+  />
+</div>
 
-            <div>
-              <Label htmlFor="prop-lng">Longitude (Optional)</Label>
-              <Input
-                id="prop-lng"
-                type="number"
-                step="any"
-                value={longitude}
-                onChange={(e) => setLongitude(e.target.value)}
-                placeholder="e.g. -118.4358"
-                className="mt-1"
-              />
-            </div>
           </div>
         </div>
 
@@ -482,9 +450,7 @@ export function PropertyForm({ initialProperty, agents: initialAgents }: Propert
           <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-100 pb-3 gap-2">
             <div>
               <h2 className="font-serif text-lg font-bold text-zinc-900">High-Resolution Photography</h2>
-              <p className="text-xs text-zinc-500">
-                Enter image URLs. Stored in <code className="text-amber-700">property_images</code> table.
-              </p>
+            
             </div>
             <span className="text-xs font-semibold text-zinc-500">
               {images.length} {images.length === 1 ? 'image' : 'images'} added

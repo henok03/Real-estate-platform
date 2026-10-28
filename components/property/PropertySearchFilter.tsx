@@ -77,42 +77,43 @@ export function PropertySearchFilter({ compact = false }: PropertySearchFilterPr
               className="flex h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
             >
               <option value="">All Architectural Types</option>
-              <option value="villa">Private Villa</option>
-              <option value="single_family">Single Family Home</option>
-              <option value="condo">Condominium</option>
-              <option value="apartment">Apartment / Penthouse</option>
-              <option value="townhouse">Townhouse</option>
-              <option value="land">Estate Land</option>
-              <option value="commercial">Commercial</option>
-              <option value="office">Office Space</option>
-              <option value="other">Other Real Estate</option>
+                        <option value="single_family">House</option>
+<option value="villa">Villa</option>
+<option value="apartment">Apartment</option>
+
+<option value="land">Land / Plot</option>
+<option value="commercial_building">Commercial Building</option>
+<option value="office">Office</option>
+<option value="shop">Shop</option>
+<option value="building">Whole Building</option>
+<option value="other">Other</option>
             </select>
           </div>
 
           {/* Price Range */}
           <div className="space-y-1">
             <label className="text-xs font-semibold uppercase tracking-wider text-zinc-600">
-              Price Range (USD)
+              Price Range (ETB)
             </label>
             <div className="flex items-center gap-2">
               <Input
                 type="number"
-                placeholder="Min $"
+                placeholder="Min ETB"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
                 className="w-1/2"
                 min="0"
-                step="50000"
+              
               />
               <span className="text-zinc-400 text-xs">-</span>
               <Input
                 type="number"
-                placeholder="Max $"
+                placeholder="Max ETB"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
                 className="w-1/2"
                 min="0"
-                step="50000"
+              
               />
             </div>
           </div>
@@ -134,7 +135,7 @@ export function PropertySearchFilter({ compact = false }: PropertySearchFilterPr
                 className="h-10 px-3 text-zinc-600"
                 title="Toggle Filters"
               >
-                <SlidersHorizontal className="h-4 w-4" />
+                <SlidersHorizontal className="h-4 w-4 text-amber-50" />
               </Button>
             )}
           </div>
@@ -177,12 +178,12 @@ export function PropertySearchFilter({ compact = false }: PropertySearchFilterPr
             <div className="flex items-end">
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={handleReset}
-                className="h-9 w-full gap-2 text-xs text-zinc-500 hover:text-zinc-900"
+                className="h-9 w-full gap-2 text-zinc-600 hover:text-white "
               >
-                <RotateCcw className="h-3.5 w-3.5" />
+                <RotateCcw className="h-3.5 w-3.5 hover: text-white" />
                 <span>Reset All Filters</span>
               </Button>
             </div>

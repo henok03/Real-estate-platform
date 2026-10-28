@@ -3,22 +3,14 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import {
-  authenticateAdmin,
-  clearSession,
-  getSessionAdmin,
-  changeAdminPassword,
+  authenticateAdmin, clearSession, getSessionAdmin, changeAdminPassword,changeAdminEmail
 } from './auth';
 import {
-  createProperty,
-  updateProperty,
-  archiveProperty,
-  deleteProperty,
-  createAgent,
-  createPropertyInquiry,
-  createContactMessage,
-  createTestimonial,
-  toggleTestimonialPublished,
-  deleteTestimonial,
+  createProperty, updateProperty, archiveProperty, deleteProperty,
+  deleteAgent, createAgent, createPropertyInquiry, createContactMessage,
+  createTestimonial, toggleTestimonialPublished, deleteTestimonial,
+  togglePropertyInquiryRead, toggleContactMessageRead,
+  deletePropertyInquiry, deleteContactMessage
 } from './db';
 import type { PropertyType, PropertyStatus } from '@/types';
 
@@ -27,14 +19,10 @@ export async function loginAction(
   prevState: { error?: string } | undefined,
   formData: FormData
 ) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-
+  const email = String(formData.get('email') ?? '');
+  const password = String(formData.get('password') ?? '');
   const result = await authenticateAdmin(email, password);
-  if (!result.success) {
-    return { error: result.error || 'Authentication failed' };
-  }
-
+  if (!result.success) return { error: result.error || 'Authentication failed' };
   redirect('/admin');
 }
 
@@ -50,35 +38,64 @@ export async function changePasswordAction(
   formData: FormData
 ) {
   const admin = await getSessionAdmin();
+  if (!admin) return { error: 'Unauthorized. Please log in again.' };
+
+  const currentPassword = String(formData.get('currentPassword') ?? '');
+  const newPassword = String(formData.get('newPassword') ?? '');
+  const confirmPassword = String(formData.get('confirmPassword') ?? '');
+
+  if (!currentPassword || !newPassword) return { error: 'All fields are required.' };
+  if (newPassword !== confirmPassword) return { error: 'New password and confirmation do not match.' };
+  if (newPassword.length < 8) return { error: 'New password must be at least 8 characters long.' };
+
+  const result = await changeAdminPassword(admin.id, currentPassword, newPassword);
+  if (!result.success) return { error: result.error || 'Password update failed.' };
+  return { success: true };
+}
+
+export async function changeAdminEmailAction(
+  prevState: { error?: string; success?: boolean } | undefined,
+  formData: FormData
+): Promise<{ error?: string; success?: boolean }> {
+  const admin = await getSessionAdmin();
+
   if (!admin) {
     return { error: 'Unauthorized. Please log in again.' };
   }
 
-  const currentPassword = formData.get('currentPassword') as string;
-  const newPassword = formData.get('newPassword') as string;
-  const confirmPassword = formData.get('confirmPassword') as string;
+  const currentPassword = String(
+    formData.get('currentPassword') ?? ''
+  );
+  const newEmail = String(formData.get('newEmail') ?? '');
+  const confirmEmail = String(
+    formData.get('confirmEmail') ?? ''
+  );
 
-  if (!currentPassword || !newPassword) {
+  if (!currentPassword || !newEmail.trim() || !confirmEmail.trim()) {
     return { error: 'All fields are required.' };
   }
 
-  if (newPassword !== confirmPassword) {
-    return { error: 'New password and confirmation do not match.' };
+  if (
+    newEmail.trim().toLowerCase() !==
+    confirmEmail.trim().toLowerCase()
+  ) {
+    return { error: 'Email addresses do not match.' };
   }
 
-  if (newPassword.length < 8) {
-    return { error: 'New password must be at least 8 characters long.' };
-  }
+  const result = await changeAdminEmail(
+    admin.id,
+    currentPassword,
+    newEmail
+  );
 
-  const res = await changeAdminPassword(admin.id, currentPassword, newPassword);
-  if (!res.success) {
-    return { error: res.error || 'Password update failed.' };
+  if (!result.success) {
+    return { error: result.error || 'Email update failed.' };
   }
 
   return { success: true };
 }
 
-// Create or Update Property Action
+// Create or Update Property
 export async function savePropertyAction(data: {
   id?: string;
   title: string;
@@ -91,91 +108,61 @@ export async function savePropertyAction(data: {
   square_feet: number | null;
   address: string;
   city: string;
-  state: string;
+
   country: string;
-  zip_code: string;
+ 
   latitude: number | null;
   longitude: number | null;
   agent_id: string | null;
   images: { image_url: string; is_primary: boolean; sort_order: number; alt_text?: string }[];
 }) {
   const admin = await getSessionAdmin();
-  if (!admin) {
-    throw new Error('Unauthorized');
-  }
-
-  if (!data.title || !data.price || !data.property_type) {
+  if (!admin) throw new Error('Unauthorized');
+  if (!data.title?.trim() || !data.price || !data.property_type) {
     throw new Error('Title, price, and property type are required.');
   }
 
+
+const propertyData = {
+  title: data.title,
+  description: data.description,
+  price: data.price,
+  property_type: data.property_type,
+  status: data.status,
+  bedrooms: data.bedrooms,
+  bathrooms: data.bathrooms,
+  square_feet: data.square_feet,
+  address: data.address,
+  city: data.city,
+  country: data.country,
+  latitude: data.latitude,
+  longitude: data.longitude,
+  agent_id: data.agent_id,
+};
+
+
   if (data.id) {
-    // Update existing
-    await updateProperty(
-      data.id,
-      {
-        title: data.title,
-        description: data.description,
-        price: data.price,
-        property_type: data.property_type,
-        status: data.status,
-        bedrooms: data.bedrooms,
-        bathrooms: data.bathrooms,
-        square_feet: data.square_feet,
-        address: data.address,
-        city: data.city,
-        state: data.state,
-        country: data.country,
-        zip_code: data.zip_code,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        agent_id: data.agent_id,
-      },
-      data.images
-    );
+    await updateProperty(data.id, propertyData, data.images);
     revalidatePath('/');
     revalidatePath('/properties');
     revalidatePath(`/properties/${data.id}`);
     revalidatePath('/admin');
     revalidatePath('/admin/properties');
     return { success: true, id: data.id };
-  } else {
-    // Create new
-    const created = await createProperty(
-      {
-        title: data.title,
-        description: data.description,
-        price: data.price,
-        property_type: data.property_type,
-        status: data.status,
-        bedrooms: data.bedrooms,
-        bathrooms: data.bathrooms,
-        square_feet: data.square_feet,
-        address: data.address,
-        city: data.city,
-        state: data.state,
-        country: data.country,
-        zip_code: data.zip_code,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        agent_id: data.agent_id,
-      },
-      data.images
-    );
-    revalidatePath('/');
-    revalidatePath('/properties');
-    revalidatePath('/admin');
-    revalidatePath('/admin/properties');
-    return { success: true, id: created.id };
   }
+
+  const created = await createProperty(propertyData, data.images);
+  revalidatePath('/');
+  revalidatePath('/properties');
+  revalidatePath('/admin');
+  revalidatePath('/admin/properties');
+  return { success: true, id: created.id };
 }
 
 // Archive Property
 export async function archivePropertyAction(id: string) {
   const admin = await getSessionAdmin();
-  if (!admin) {
-    throw new Error('Unauthorized');
-  }
-
+  if (!admin) throw new Error('Unauthorized');
   await archiveProperty(id);
   revalidatePath('/');
   revalidatePath('/properties');
@@ -188,10 +175,7 @@ export async function archivePropertyAction(id: string) {
 // Delete Property
 export async function deletePropertyAction(id: string) {
   const admin = await getSessionAdmin();
-  if (!admin) {
-    throw new Error('Unauthorized');
-  }
-
+  if (!admin) throw new Error('Unauthorized');
   await deleteProperty(id);
   revalidatePath('/');
   revalidatePath('/properties');
@@ -200,7 +184,7 @@ export async function deletePropertyAction(id: string) {
   return { success: true };
 }
 
-// Create Agent Action
+// Create Agent
 export async function createAgentAction(data: {
   name: string;
   email?: string;
@@ -210,25 +194,29 @@ export async function createAgentAction(data: {
   image_url?: string;
 }) {
   const admin = await getSessionAdmin();
-  if (!admin) {
-    throw new Error('Unauthorized');
-  }
-
-  if (!data.name) {
-    throw new Error('Agent name is required');
-  }
+  if (!admin) throw new Error('Unauthorized');
+  if (!data.name?.trim()) throw new Error('Agent name is required');
 
   const agent = await createAgent({
-    name: data.name,
+    name: data.name.trim(),
     email: data.email || null,
     phone: data.phone || null,
     bio: data.bio || null,
     profile_image_url: data.profile_image_url || data.image_url || null,
   });
-
   revalidatePath('/admin/properties/new');
   revalidatePath('/admin/agents');
   return { success: true, agent };
+}
+
+// Delete Agent
+export async function deleteAgentAction(id: number | string) {
+  const admin = await getSessionAdmin();
+  if (!admin) throw new Error('Unauthorized');
+  await deleteAgent(id);
+  revalidatePath('/admin/agents');
+  revalidatePath('/admin/properties');
+  return { success: true };
 }
 
 // Public: Submit Property Inquiry
@@ -236,29 +224,25 @@ export async function submitPropertyInquiryAction(
   prevState: { success?: boolean; error?: string } | undefined,
   formData: FormData
 ) {
-  const propertyId = formData.get('propertyId') as string;
-  const name = formData.get('name') as string;
-  const email = formData.get('email') as string;
-  const phone = formData.get('phone') as string;
-  const message = formData.get('message') as string;
+  const propertyId = String(formData.get('propertyId') ?? '');
+  const name = String(formData.get('name') ?? '');
+  const email = String(formData.get('email') ?? '');
+  const phone = String(formData.get('phone') ?? '');
+  const message = String(formData.get('message') ?? '');
 
-  if (!propertyId || !name || !email || !message) {
+  if (!propertyId || !name.trim() || !email.trim() || !message.trim()) {
     return { success: false, error: 'Please fill in all required fields (Name, Email, Message).' };
   }
-
-  // Basic email pattern check
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
     return { success: false, error: 'Please enter a valid email address.' };
   }
 
   try {
     await createPropertyInquiry({
-      property_id: propertyId,
-      name: name.trim(),
-      email: email.trim(),
-      phone: phone ? phone.trim() : null,
-      message: message.trim(),
+      property_id: propertyId, name: name.trim(), email: email.trim(),
+      phone: phone.trim() || null, message: message.trim(),
     });
+    revalidatePath('/admin/inquiries');
     return { success: true };
   } catch (error) {
     console.error('Error submitting inquiry:', error);
@@ -271,33 +255,54 @@ export async function submitContactMessageAction(
   prevState: { success?: boolean; error?: string } | undefined,
   formData: FormData
 ) {
-  const name = formData.get('name') as string;
-  const email = formData.get('email') as string;
-  const phone = formData.get('phone') as string;
-  const subject = formData.get('subject') as string;
-  const message = formData.get('message') as string;
+  const name = String(formData.get('name') ?? '');
+  const email = String(formData.get('email') ?? '');
+  const phone = String(formData.get('phone') ?? '');
+  const subject = String(formData.get('subject') ?? '');
+  const message = String(formData.get('message') ?? '');
 
-  if (!name || !email || !message) {
+  if (!name.trim() || !email.trim() || !message.trim()) {
     return { success: false, error: 'Please fill in Name, Email, and Message.' };
   }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
     return { success: false, error: 'Please provide a valid email address.' };
   }
 
   try {
     await createContactMessage({
-      name: name.trim(),
-      email: email.trim(),
-      phone: phone ? phone.trim() : null,
-      subject: subject ? subject.trim() : null,
-      message: message.trim(),
+      name: name.trim(), email: email.trim(), phone: phone.trim() || null,
+      subject: subject.trim() || null, message: message.trim(),
     });
+    revalidatePath('/admin/inquiries');
     return { success: true };
   } catch (error) {
     console.error('Error submitting contact message:', error);
     return { success: false, error: 'Failed to send message. Please try again.' };
   }
+}
+
+// Admin: Toggle Property Inquiry Read Status
+export async function togglePropertyInquiryReadAction(
+  id: string | number,
+  isRead: boolean
+) {
+  const admin = await getSessionAdmin();
+  if (!admin) throw new Error('Unauthorized');
+  await togglePropertyInquiryRead(id, isRead);
+  revalidatePath('/admin/inquiries');
+  return { success: true };
+}
+
+// Admin: Toggle Contact Message Read Status
+export async function toggleContactMessageReadAction(
+  id: string | number,
+  isRead: boolean
+) {
+  const admin = await getSessionAdmin();
+  if (!admin) throw new Error('Unauthorized');
+  await toggleContactMessageRead(id, isRead);
+  revalidatePath('/admin/inquiries');
+  return { success: true };
 }
 
 // Admin: Create Testimonial
@@ -311,9 +316,7 @@ export async function createTestimonialAction(data: {
   is_published?: boolean;
 }) {
   const admin = await getSessionAdmin();
-  if (!admin) {
-    throw new Error('Unauthorized');
-  }
+  if (!admin) throw new Error('Unauthorized');
 
   const name = data.customer_name || data.client_name;
   if (!name?.trim() || !data.content?.trim()) {
@@ -334,13 +337,13 @@ export async function createTestimonialAction(data: {
   return { success: true, testimonial };
 }
 
-// Admin: Toggle Testimonial Published
-export async function toggleTestimonialPublishedAction(id: string, is_published: boolean) {
+// Admin: Toggle Testimonial Published Status
+export async function toggleTestimonialPublishedAction(
+  id: string,
+  is_published: boolean
+) {
   const admin = await getSessionAdmin();
-  if (!admin) {
-    throw new Error('Unauthorized');
-  }
-
+  if (!admin) throw new Error('Unauthorized');
   await toggleTestimonialPublished(id, is_published);
   revalidatePath('/');
   revalidatePath('/admin');
@@ -351,13 +354,37 @@ export async function toggleTestimonialPublishedAction(id: string, is_published:
 // Admin: Delete Testimonial
 export async function deleteTestimonialAction(id: string) {
   const admin = await getSessionAdmin();
-  if (!admin) {
-    throw new Error('Unauthorized');
-  }
-
+  if (!admin) throw new Error('Unauthorized');
   await deleteTestimonial(id);
   revalidatePath('/');
   revalidatePath('/admin');
   revalidatePath('/admin/testimonials');
+  return { success: true };
+}
+
+
+export async function deletePropertyInquiryAction(id: string) {
+  const admin = await getSessionAdmin();
+
+  if (!admin) {
+    throw new Error('Unauthorized');
+  }
+
+  await deletePropertyInquiry(id);
+  revalidatePath('/admin/inquiries');
+
+  return { success: true };
+}
+
+export async function deleteContactMessageAction(id: string) {
+  const admin = await getSessionAdmin();
+
+  if (!admin) {
+    throw new Error('Unauthorized');
+  }
+
+  await deleteContactMessage(id);
+  revalidatePath('/admin/inquiries');
+
   return { success: true };
 }

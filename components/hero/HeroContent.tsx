@@ -15,7 +15,7 @@ export function HeroContent() {
         className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold text-amber-300 backdrop-blur-md mb-6 shadow-lg shadow-amber-500/10"
       >
         <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
-        <span>Bespoke Global Real Estate Portfolio</span>
+        <span>Exceptional Properties. Timeless Value</span>
       </motion.div>
 
       {/* Main Headline with staggered text reveal */}
@@ -32,15 +32,16 @@ export function HeroContent() {
       </motion.h1>
 
       {/* Subtitle */}
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-        className="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-zinc-300 leading-relaxed font-light"
-      >
-        Connecting distinguished collectors and private investors with prime architectural sanctuaries,
-        waterfront villas, and prestigious urban penthouses across premier markets.
-      </motion.p>
+   <motion.p
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+  className="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-zinc-300 leading-relaxed font-light"
+>
+  Discover exceptional properties with Aura Estates. From elegant family
+  homes and modern apartments to premium villas and commercial spaces,
+  we help you find the right property to match your lifestyle, needs, and ambitions.
+</motion.p>
 
       {/* Animated Search Box */}
       <motion.div

@@ -89,7 +89,7 @@ export function HeroSlideshow({ children }: HeroSlideshowProps) {
             initial={{ opacity: 0, scale: 1.08 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 1.4, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
             className="absolute inset-0"
           >
               <Image
@@ -106,7 +106,7 @@ export function HeroSlideshow({ children }: HeroSlideshowProps) {
         </AnimatePresence>
 
         {/* Cinematic Vignette & Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-zinc-950/40 pointer-events-none" />
+<div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-zinc-950/70 via-zinc-900/30 to-transparent backdrop-blur-[1px]" />
         <div className="absolute inset-0 bg-radial-[circle_at_center,transparent_0%,rgba(9,9,11,0.55)_100%] pointer-events-none" />
       </div>
 

@@ -60,15 +60,13 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <AnimateIn direction="up">
               <div className="max-w-2xl">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-600">
-                  Signature Portfolio
-                </span>
+                
                 <h1 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-zinc-950 mt-2">
                   Available Residences
                 </h1>
                 <p className="mt-3 text-base text-zinc-600 leading-relaxed">
                   Explore authenticated estates, luxury villas, and bespoke penthouse residences.
-                  All listings are retrieved directly from PostgreSQL.
+                 
                 </p>
               </div>
             </AnimateIn>
@@ -90,16 +88,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
                 {properties.length === 1 ? 'residence' : 'residences'} matching criteria
               </div>
 
-              {hasActiveFilters && (
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-amber-700">Filters active</span>
-                  <Link href="/properties">
-                    <Button variant="ghost" size="sm" className="h-7 text-xs text-zinc-600 hover:text-zinc-900">
-                      Clear all filters
-                    </Button>
-                  </Link>
-                </div>
-              )}
+              
             </div>
           </AnimateIn>
 
@@ -136,21 +125,14 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
                 </p>
 
                 <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                  {hasActiveFilters ? (
+                 
                     <Link href="/properties">
                       <Button className="bg-zinc-900 text-white hover:bg-zinc-800 gap-2">
                         <ArrowLeft className="h-4 w-4" />
                         <span>Reset Filters</span>
                       </Button>
                     </Link>
-                  ) : (
-                    <Link href="/admin/properties/new">
-                      <Button className="bg-zinc-900 text-white hover:bg-zinc-800 gap-2 shadow">
-                        <PlusCircle className="h-4 w-4" />
-                        <span>Add Property via Admin</span>
-                      </Button>
-                    </Link>
-                  )}
+                  
                 </div>
               </div>
             </AnimateIn>

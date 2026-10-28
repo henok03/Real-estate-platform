@@ -1,129 +1,191 @@
+
 import Link from 'next/link';
-import { Building2, Mail, Phone, MapPin, ArrowUpRight } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  MapPin,
+} from 'lucide-react';
+import Image from 'next/image';
 
 export function Footer() {
   return (
-    <footer className="border-t border-zinc-200 bg-zinc-950 text-zinc-300">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
-          {/* Brand info */}
-          <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-zinc-950 shadow">
-                <Building2 className="h-5 w-5 stroke-[2.2] text-amber-600" />
-              </div>
+    <footer className="border-t border-zinc-800 bg-zinc-950 text-zinc-300">
+      <div className="mx-auto max-w-7xl px-5 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-9 sm:gap-x-8 sm:gap-y-10 lg:grid-cols-4 lg:gap-12">
+
+          {/* Brand Information */}
+          <div className="col-span-2 space-y-4 text-center lg:col-span-1 lg:text-left">
+            <Link
+              href="/"
+              className="flex items-center justify-center gap-3 lg:justify-start"
+            >
+              <Image
+                src="/images/logo.png"
+                alt="Aura Estates logo"
+                width={64}
+                height={64}
+                className="h-14 w-14 shrink-0 object-contain sm:h-16 sm:w-16"
+              />
+
               <span className="font-serif text-xl font-bold tracking-tight text-white">
                 Aura <span className="text-amber-500">Estates</span>
               </span>
             </Link>
-            <p className="text-sm leading-relaxed text-zinc-400">
-              Curating prime residential sanctuaries, luxury penthouses, and bespoke architectural estates
-              crafted for distinguished lifestyles.
+
+            <p className="mx-auto max-w-sm text-sm leading-relaxed text-zinc-400 lg:mx-0">
+              Discover houses, apartments, villas, land, and
+              commercial properties in Ethiopia. Find the right
+              property for your home, business, or investment.
             </p>
-            <div className="pt-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-900 border border-zinc-800 px-3 py-1 text-xs text-amber-400 font-medium">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Neon PostgreSQL Verified
-              </span>
-            </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white">Quick Navigation</h4>
-            <ul className="space-y-2.5 text-sm">
+          {/* Quick Navigation */}
+          <div className="min-w-0 space-y-5">
+            <h4 className="text-xs font-bold uppercase tracking-wide text-white">
+              Quick Navigation
+            </h4>
+
+            <ul className="space-y-3 text-sm">
               <li>
-                <Link href="/" className="hover:text-amber-400 transition-colors">
-                  Home Overview
+                <Link href="/" className="transition-colors hover:text-amber-400">
+                  Home
                 </Link>
               </li>
               <li>
-                <Link href="/properties" className="hover:text-amber-400 transition-colors">
+                <Link href="/properties" className="transition-colors hover:text-amber-400">
                   All Properties
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-amber-400 transition-colors">
-                  About Our Heritage
+                <Link href="/about" className="transition-colors hover:text-amber-400">
+                  About Us
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-amber-400 transition-colors">
-                  Inquiries & Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin/login" className="hover:text-amber-400 transition-colors inline-flex items-center gap-1">
-                  Admin Portal <ArrowUpRight className="h-3 w-3" />
+                <Link href="/contact" className="transition-colors hover:text-amber-400">
+                  Contact Us
                 </Link>
               </li>
             </ul>
           </div>
 
           {/* Property Types */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white">Property Types</h4>
-            <ul className="space-y-2.5 text-sm text-zinc-400">
+          <div className="min-w-0 space-y-5">
+            <h4 className="text-xs font-bold uppercase tracking-wide text-white">
+              Property Types
+            </h4>
+
+            <ul className="space-y-3 text-sm text-zinc-400">
               <li>
-                <Link href="/properties?property_type=villa" className="hover:text-amber-400 transition-colors">
-                  Private Villas
+                <Link
+                  href="/properties?property_type=house"
+                  className="break-words transition-colors hover:text-amber-400"
+                >
+                  Houses
                 </Link>
               </li>
               <li>
-                <Link href="/properties?property_type=condo" className="hover:text-amber-400 transition-colors">
-                  Luxury Condominiums
+                <Link
+                  href="/properties?property_type=villa"
+                  className="break-words transition-colors hover:text-amber-400"
+                >
+                  Villas
                 </Link>
               </li>
               <li>
-                <Link href="/properties?property_type=apartment" className="hover:text-amber-400 transition-colors">
-                  Penthouse Apartments
+                <Link
+                  href="/properties?property_type=apartment"
+                  className="break-words transition-colors hover:text-amber-400"
+                >
+                  Apartments
                 </Link>
               </li>
               <li>
-                <Link href="/properties?property_type=single_family" className="hover:text-amber-400 transition-colors">
-                  Single-Family Residences
+                <Link
+                  href="/properties?property_type=land"
+                  className="break-words transition-colors hover:text-amber-400"
+                >
+                  Land
                 </Link>
               </li>
               <li>
-                <Link href="/properties?property_type=commercial" className="hover:text-amber-400 transition-colors">
-                  Commercial & Office
+                <Link
+                  href="/properties?property_type=shop"
+                  className="break-words transition-colors hover:text-amber-400"
+                >
+                  Shops
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/properties?property_type=commercial_building"
+                  className="break-words transition-colors hover:text-amber-400"
+                >
+                  Commercial Buildings
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Contact Details */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white">Private Office</h4>
-            <ul className="space-y-3 text-sm text-zinc-400">
+          {/* Contact Information */}
+          <div className="col-span-2 min-w-0 space-y-5 lg:col-span-1">
+            <h4 className="text-xs font-bold uppercase tracking-wide text-white">
+              Contact Information
+            </h4>
+
+            <ul className="space-y-4 text-sm text-zinc-400">
               <li className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 shrink-0 text-amber-500 mt-1" />
-                <span>450 Park Avenue, Suite 2800, New York, NY 10022</span>
+                <MapPin className="mt-1 h-4 w-4 shrink-0 text-amber-500" />
+                <span className="min-w-0 break-words leading-relaxed">
+                  Addis Ababa, Ethiopia
+                  <span className="mt-1 block text-xs text-zinc-500">
+                    Replace with your actual office address
+                  </span>
+                </span>
               </li>
-              <li className="flex items-center gap-3">
-                <Phone className="h-4 w-4 shrink-0 text-amber-500" />
-                <span>+1 (800) 555-AURA (2872)</span>
+
+              <li className="flex items-start gap-3">
+                <Phone className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                <a
+                  href="tel:+251911000000"
+                  className="min-w-0 break-words transition-colors hover:text-amber-400"
+                >
+                  +251 91 100 0000
+                </a>
               </li>
-              <li className="flex items-center gap-3">
-                <Mail className="h-4 w-4 shrink-0 text-amber-500" />
-                <span>concierge@auraestates.com</span>
+
+              <li className="flex items-start gap-3">
+                <Mail className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                <a
+                  href="mailto:info@auraestates.com"
+                  className="min-w-0 break-all transition-colors hover:text-amber-400"
+                >
+                  info@auraestates.com
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-12 border-t border-zinc-900 pt-8 flex flex-col items-center justify-between gap-4 text-xs text-zinc-300 md:flex-row">
-          <p>© {new Date().getFullYear()} Aura Estates International Realty. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <Link href="/admin/login" className="hover:text-zinc-200">
-              Admin Login
-            </Link>
-            <Link href="/contact" className="hover:text-zinc-200">
+        {/* Bottom Bar */}
+        <div className="mt-9 flex flex-col items-center gap-5 border-t border-zinc-800 pt-6 text-xs text-zinc-400 sm:mt-12 sm:pt-8 md:flex-row md:justify-between">
+          <p className="text-center leading-relaxed md:text-left">
+            © {new Date().getFullYear()} Aura Estates. All rights reserved.
+          </p>
+
+          <div className="flex flex-row flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:gap-x-6">
+            <Link
+              href="/contact"
+              className="transition-colors hover:text-amber-400"
+            >
               Privacy Policy
             </Link>
-            <Link href="/contact" className="hover:text-zinc-200">
-              Terms of Representation
+
+            <Link
+              href="/contact"
+              className="transition-colors hover:text-amber-400"
+            >
+              Terms &amp; Conditions
             </Link>
           </div>
         </div>

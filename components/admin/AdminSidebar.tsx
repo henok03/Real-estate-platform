@@ -40,9 +40,20 @@ export function AdminSidebar({ adminEmail, adminName }: AdminSidebarProps) {
   ];
 
   const isActive = (href: string) => {
-    if (href === '/admin') return pathname === '/admin';
-    return pathname.startsWith(href);
-  };
+  if (href === '/admin') {
+    return pathname === '/admin';
+  }
+
+  if (href === '/admin/properties') {
+    return (
+      pathname === '/admin/properties' ||
+      (pathname.startsWith('/admin/properties/') &&
+        pathname !== '/admin/properties/new')
+    );
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
+};
 
   return (
     <>

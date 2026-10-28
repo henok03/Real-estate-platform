@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
-import { getAdminByEmail, getAdminById, updateAdminPassword } from './db';
+import { getAdminByEmail, getAdminById, updateAdminPassword,updateAdminEmail } from './db';
 import type { AdminUser } from '@/types';
 
 const COOKIE_NAME = 'aura_admin_session';
@@ -124,6 +124,55 @@ export async function changeAdminPassword(
   const updated = await updateAdminPassword(adminId, newHash);
   if (!updated) {
     return { success: false, error: 'Failed to update password in database.' };
+  }
+
+  return { success: true };
+}
+
+export async function changeAdminEmail(
+  adminId: string,
+  currentPassword: string,
+  newEmail: string
+): Promise<{ success: boolean; error?: string }> {
+  const email = newEmail.trim().toLowerCase();
+
+  if (!currentPassword || !email) {
+    return { success: false, error: 'All fields are required.' };
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { success: false, error: 'Enter a valid email address.' };
+  }
+
+  const admin = await getAdminById(adminId);
+
+  if (!admin || !admin.is_active || !admin.password_hash) {
+    return { success: false, error: 'Admin account not found or inactive.' };
+  }
+
+  const matches = await comparePassword(
+    currentPassword,
+    admin.password_hash
+  );
+
+  if (!matches) {
+    return { success: false, error: 'Current password is incorrect.' };
+  }
+
+  if (admin.email.toLowerCase() === email) {
+    return {
+      success: false,
+      error: 'The new email must be different from your current email.',
+    };
+  }
+
+  const result = await updateAdminEmail(adminId, email);
+
+  if (!result.success) {
+    return {
+      success: false,
+      error: result.error || 'Email update failed.',
+    };
   }
 
   return { success: true };

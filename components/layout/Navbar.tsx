@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Building2, Menu, X, ShieldCheck, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
-
+import Image from 'next/image';
 export function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -28,20 +28,35 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200/80 bg-white/95 backdrop-blur-md transition-all">
       <div className="mx-auto flex h-18 sm:h-20 max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8">
-        {/* Responsive Logo & Brand */}
-        <Link href="/" className="group flex items-center gap-2.5 sm:gap-3 shrink-0">
-          <div className="flex h-9 w-9 sm:h-10 sm:w-10 lg:h-11 lg:w-11 shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-amber-500 shadow-md transition-transform duration-200 group-hover:scale-105">
-            <Building2 className="h-5 w-5 sm:h-5.5 sm:w-5.5 lg:h-6 lg:w-6 stroke-[2.2]" />
-          </div>
-          <div className="min-w-0">
-            <span className="font-serif text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight text-zinc-950 whitespace-nowrap block leading-tight">
-              Aura <span className="text-amber-600">Estates</span>
-            </span>
-            <span className="block text-[8px] sm:text-[9px] lg:text-[10px] uppercase tracking-widest text-zinc-500 font-semibold truncate leading-none mt-0.5">
-              Signature Residences
-            </span>
-          </div>
-        </Link>
+  
+{/* Responsive Logo & Brand */}
+<Link
+  href="/"
+  className="group flex shrink-0 items-center gap-3 sm:gap-4"
+>
+  <div className="relative flex shrink-0 items-center justify-center">
+    <Image
+      src="/images/logo.png"
+      alt="Aura Estates"
+      width={40}
+      height={40}
+      priority
+      sizes="(max-width: 600px) 44px, 44px"
+      className="h-14 w-14 max-w-[46px] object-contain transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_8px_rgba(217,119,6,0.35)] sm:h-[72px] sm:max-w-[100px]"
+    />
+  </div>
+
+  <div className="min-w-0">
+    <span className="block whitespace-nowrap font-serif text-base font-bold leading-tight tracking-tight text-zinc-950 sm:text-xl md:text-2xl lg:text-3xl">
+      Aura <span className="text-amber-600">Estates</span>
+    </span>
+
+    <span className="mt-1 block whitespace-nowrap text-[8px] font-semibold uppercase leading-none tracking-[0.16em] text-zinc-500 sm:text-[10px] sm:tracking-[0.2em]">
+     Where Luxury Lives
+    </span>
+  </div>
+</Link>
+
 
         {/* Desktop Navigation Links (Visible on large screens 1024px+) */}
         <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
@@ -72,16 +87,7 @@ export function Navbar() {
 
         {/* Action & Admin Area Access on Large Screens */}
         <div className="hidden lg:flex items-center gap-2.5">
-          <Link href="/admin">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 border-zinc-200 text-zinc-700 hover:border-zinc-300 hover:text-zinc-900"
-            >
-              <ShieldCheck className="h-4 w-4 text-amber-600" />
-              <span>{isAdmin ? 'Dashboard' : 'Portal'}</span>
-            </Button>
-          </Link>
+       
           <Link href="/properties">
             <Button className="bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm gap-1.5 px-4 text-xs font-semibold">
               <span>Explore Listings</span>
@@ -103,16 +109,7 @@ export function Navbar() {
             </Button>
           </Link>
 
-          <Link href="/admin">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 text-zinc-700 hover:bg-zinc-100"
-              title="Admin Portal"
-            >
-              <ShieldCheck className="h-4.5 w-4.5 text-amber-600" />
-            </Button>
-          </Link>
+         
 
           <button
             type="button"
@@ -154,14 +151,7 @@ export function Navbar() {
                 );
               })}
               <div className="pt-4 border-t border-zinc-100 flex flex-col sm:flex-row gap-2.5">
-                <Link
-                  href="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-zinc-200 px-4 py-3 text-sm font-medium text-zinc-800 hover:bg-zinc-50 transition-colors"
-                >
-                  <ShieldCheck className="h-4 w-4 text-amber-600" />
-                  <span>Admin Dashboard Portal</span>
-                </Link>
+               
                 <Link
                   href="/properties"
                   onClick={() => setMobileMenuOpen(false)}

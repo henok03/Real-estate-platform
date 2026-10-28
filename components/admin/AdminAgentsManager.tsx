@@ -3,12 +3,12 @@
 import { useState, useTransition } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Users, UserPlus, Mail, Phone, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Users, UserPlus, Mail, Phone, Loader2, CheckCircle2, AlertCircle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { createAgentAction } from '@/lib/actions';
+import { createAgentAction, deleteAgentAction } from '@/lib/actions';
 import type { Agent } from '@/types';
 
 interface AdminAgentsManagerProps {
@@ -18,6 +18,8 @@ interface AdminAgentsManagerProps {
 export function AdminAgentsManager({ initialAgents }: AdminAgentsManagerProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [deletingId, setDeletingId] = useState<number | string | null>(null);
+  const [agentToDelete, setAgentToDelete] = useState<{ id: number | string; name: string } | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -59,6 +61,32 @@ export function AdminAgentsManager({ initialAgents }: AdminAgentsManagerProps) {
     });
   };
 
+  const confirmDelete = (id: number | string, agentName: string) => {
+    setAgentToDelete({ id, name: agentName });
+  };
+
+  const executeDelete = () => {
+    if (!agentToDelete) return;
+
+    const { id, name: agentName } = agentToDelete;
+    setError(null);
+    setSuccess(null);
+    setDeletingId(id);
+    setAgentToDelete(null);
+
+    startTransition(async () => {
+      try {
+        await deleteAgentAction(id);
+        setSuccess(`Agent "${agentName}" successfully removed.`);
+        router.refresh();
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Failed to delete agent.');
+      } finally {
+        setDeletingId(null);
+      }
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -87,34 +115,60 @@ export function AdminAgentsManager({ initialAgents }: AdminAgentsManagerProps) {
         </div>
       )}
 
+      {error && !showModal && (
+        <div className="flex items-center gap-2 rounded-xl bg-rose-50 border border-rose-200 p-4 text-xs text-rose-800">
+          <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+          <span>{error}</span>
+        </div>
+      )}
+
       {initialAgents.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {initialAgents.map((agent) => (
             <div
               key={agent.id}
-              className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col justify-between"
+              className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col justify-between relative group"
             >
               <div>
-                <div className="flex items-start gap-4">
-                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-zinc-100 border border-zinc-200">
-                    {agent.image_url ? (
-                      <Image
-                        src={agent.image_url}
-                        alt={agent.name}
-                        fill
-                        referrerPolicy="no-referrer"
-                        className="object-cover"
-                      />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-4">
+                    <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full bg-zinc-100">
+                      {agent.image_url && /^https?:\/\/.+/i.test(agent.image_url) ? (
+                        <Image
+                          src={agent.image_url}
+                          alt={agent.name}
+                          fill
+                          sizes="64px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-zinc-500">
+                          {agent.name?.charAt(0)?.toUpperCase() || "A"}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <h3 className="font-serif text-lg font-bold text-zinc-900">{agent.name}</h3>
+                      <span className="text-xs text-zinc-400">ID #{agent.id}</span>
+                    </div>
+                  </div>
+
+                  {/* Delete Button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => confirmDelete(agent.id, agent.name)}
+                    disabled={isPending && deletingId === agent.id}
+                    className="text-zinc-400 hover:text-rose-600 hover:bg-rose-50 h-8 w-8 rounded-lg transition-colors shrink-0"
+                    title="Delete Agent"
+                  >
+                    {isPending && deletingId === agent.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-rose-600" />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center font-serif text-xl font-bold text-zinc-600 bg-amber-50">
-                        {agent.name.charAt(0)}
-                      </div>
+                      <Trash2 className="h-4 w-4" />
                     )}
-                  </div>
-                  <div>
-                    <h3 className="font-serif text-lg font-bold text-zinc-900">{agent.name}</h3>
-                    <span className="text-xs text-zinc-400">ID #{agent.id}</span>
-                  </div>
+                  </Button>
                 </div>
 
                 {agent.bio && (
@@ -268,6 +322,38 @@ export function AdminAgentsManager({ initialAgents }: AdminAgentsManagerProps) {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Delete Confirmation Modal */}
+      {agentToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-600 mb-4">
+              <AlertCircle className="h-6 w-6" />
+            </div>
+            <h3 className="font-serif text-lg font-bold text-zinc-900 mb-1">Delete Agent</h3>
+            <p className="text-xs text-zinc-500 mb-6">
+              Are you sure you want to delete <span className="font-semibold text-zinc-800">{agentToDelete.name}</span>? This action cannot be undone.
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setAgentToDelete(null)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={executeDelete}
+                className="flex-1 bg-rose-600 text-white hover:bg-rose-700"
+              >
+                Delete
+              </Button>
+            </div>
           </div>
         </div>
       )}

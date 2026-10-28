@@ -33,21 +33,16 @@ export function formatPropertyType(type: string): string {
   }
 }
 
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+
 
 export function PropertyCard({ property, priority = false }: PropertyCardProps) {
   const imageUrl = property.primary_image || property.images?.[0]?.image_url;
-  const locationString = [property.city, property.state, property.country]
+  const locationString = [property.city,  property.country]
     .filter(Boolean)
     .join(', ');
 
   return (
+      <Link href={`/properties/${property.id}`} className="block">
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       {/* Thumbnail Area */}
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-zinc-100">
@@ -80,7 +75,7 @@ export function PropertyCard({ property, priority = false }: PropertyCardProps) 
 
         <div className="absolute bottom-3 right-3">
           <span className="rounded-lg bg-white/95 px-3 py-1 font-serif text-base font-bold text-zinc-950 shadow-md backdrop-blur-sm">
-            {formatCurrency(property.price)}
+           {Number(property.price).toLocaleString('en-US')} ETB
           </span>
         </div>
       </div>
@@ -132,7 +127,7 @@ export function PropertyCard({ property, priority = false }: PropertyCardProps) 
 
         {/* View Details Button */}
         <div className="mt-5 pt-3">
-          <Link href={`/properties/${property.id}`} className="block">
+        
       <Button
   variant="outline"
   className="w-full justify-between border-zinc-200 text-zinc-800 bg-white hover:bg-zinc-900 hover:text-white hover:border-zinc-900 group-hover:bg-zinc-900 group-hover:text-white group-hover:border-zinc-900 transition-all duration-200"
@@ -140,9 +135,10 @@ export function PropertyCard({ property, priority = false }: PropertyCardProps) 
   <span className="text-current">View Residence Details</span>
   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
 </Button>
-          </Link>
+          
         </div>
       </div>
     </div>
+    </Link>
   );
 }

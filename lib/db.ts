@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { neon } from '@neondatabase/serverless';
 import bcrypt from 'bcryptjs';
+
 import type {
   AdminUser,
   Agent,
@@ -94,9 +95,9 @@ function mapPropertyRow(row: Record<string, any>): Property {
     square_feet: row.square_feet !== null && row.square_feet !== undefined ? Number(row.square_feet) : null,
     address: row.address ? String(row.address) : null,
     city: row.city ? String(row.city) : null,
-    state: row.state ? String(row.state) : null,
+  
     country: row.country ? String(row.country) : null,
-    zip_code: row.zip_code ? String(row.zip_code) : null,
+  
     latitude: row.latitude !== null && row.latitude !== undefined ? Number(row.latitude) : null,
     longitude: row.longitude !== null && row.longitude !== undefined ? Number(row.longitude) : null,
     agent_id: row.agent_id ? String(row.agent_id) : null,
@@ -170,7 +171,7 @@ export async function getProperties(filters: PropertyFilterParams = {}): Promise
         const search = `%${filters.location.trim().toLowerCase()}%`;
         query += ` AND (
           LOWER(p.city) LIKE $${paramIdx} OR 
-          LOWER(p.state) LIKE $${paramIdx} OR 
+         
           LOWER(p.country) LIKE $${paramIdx} OR 
           LOWER(p.address) LIKE $${paramIdx} OR 
           LOWER(p.title) LIKE $${paramIdx}
@@ -236,7 +237,7 @@ export async function getProperties(filters: PropertyFilterParams = {}): Promise
     list = list.filter(
       (p) =>
         (p.city && p.city.toLowerCase().includes(loc)) ||
-        (p.state && p.state.toLowerCase().includes(loc)) ||
+       
         (p.country && p.country.toLowerCase().includes(loc)) ||
         (p.title && p.title.toLowerCase().includes(loc))
     );
@@ -365,13 +366,13 @@ export async function createProperty(
         `INSERT INTO properties (
           title, description, price, property_type, status,
           bedrooms, bathrooms, square_feet, address, city,
-          state, country, zip_code, latitude, longitude,
+           country,  latitude, longitude,
           agent_id, published_at
         ) VALUES (
           $1, $2, $3, $4, $5,
           $6, $7, $8, $9, $10,
           $11, $12, $13, $14, $15,
-          $16, $17
+        
         ) RETURNING *;`,
         [
           data.title,
@@ -384,9 +385,9 @@ export async function createProperty(
           data.square_feet ?? null,
           data.address || null,
           data.city || null,
-          data.state || null,
+        
           data.country || null,
-          data.zip_code || null,
+         
           data.latitude ?? null,
           data.longitude ?? null,
           agentId,
@@ -461,17 +462,17 @@ export async function updateProperty(
           square_feet = $8,
           address = $9,
           city = $10,
-          state = $11,
-          country = $12,
-          zip_code = $13,
-          latitude = $14,
-          longitude = $15,
-          agent_id = $16,
+        
+          country = $11,
+          
+          latitude = $12,
+          longitude = $13,
+          agent_id = $14,
           published_at = CASE 
             WHEN COALESCE($5, status) = 'published' AND published_at IS NULL THEN NOW()
             ELSE published_at 
           END
-        WHERE id = $17;`,
+        WHERE id = $15;`,
         [
           data.title,
           data.description,
@@ -483,9 +484,9 @@ export async function updateProperty(
           data.square_feet ?? null,
           data.address ?? null,
           data.city ?? null,
-          data.state ?? null,
+         
           data.country ?? null,
-          data.zip_code ?? null,
+       
           data.latitude ?? null,
           data.longitude ?? null,
           agentId,
@@ -585,6 +586,7 @@ export async function getAgents(): Promise<Agent[]> {
   if (sql) {
     try {
       const rows = (await sql.query(`SELECT * FROM agents ORDER BY name ASC;`)) as Record<string, any>[];
+      
       return rows.map((a) => ({
         id: String(a.id),
         name: String(a.name),
@@ -765,6 +767,73 @@ export async function updateAdminPassword(id: string, newHash: string): Promise<
   return true;
 }
 
+export async function updateAdminEmail(
+  id: string,
+  newEmail: string
+): Promise<{ success: boolean; error?: string }> {
+  const email = newEmail.trim().toLowerCase();
+
+  const sql = getSql();
+
+  if (sql) {
+    try {
+      const existing = (await sql.query(
+        `SELECT id FROM admin_users
+         WHERE LOWER(email) = LOWER($1) AND id <> $2
+         LIMIT 1;`,
+        [email, id]
+      )) as Record<string, any>[];
+
+      if (existing.length > 0) {
+        return {
+          success: false,
+          error: 'This email address is already in use.',
+        };
+      }
+
+      const rows = (await sql.query(
+        `UPDATE admin_users
+         SET email = $1, updated_at = NOW()
+         WHERE id = $2
+         RETURNING id;`,
+        [email, id]
+      )) as Record<string, any>[];
+
+      if (rows.length === 0) {
+        return { success: false, error: 'Admin account not found.' };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating admin email:', error);
+      return {
+        success: false,
+        error: 'Could not update the email. Check whether it is already in use.',
+      };
+    }
+  }
+
+  const store = getMemoryStore();
+  const admin = store.admin_users.find((u) => u.id === id);
+
+  if (!admin) {
+    return { success: false, error: 'Admin account not found.' };
+  }
+
+  const duplicate = store.admin_users.some(
+    (u) => u.id !== id && u.email.toLowerCase() === email
+  );
+
+  if (duplicate) {
+    return { success: false, error: 'This email address is already in use.' };
+  }
+
+  admin.email = email;
+  admin.updated_at = new Date().toISOString();
+
+  return { success: true };
+}
+
 // ----------------------------------------------------
 // INQUIRIES & CONTACT MESSAGES REPOSITORY
 // ----------------------------------------------------
@@ -819,12 +888,14 @@ export async function createPropertyInquiry(data: {
   return newInq;
 }
 
+
 export async function getPropertyInquiries(): Promise<PropertyInquiry[]> {
   const sql = getSql();
+
   if (sql) {
     try {
       const rows = (await sql.query(`
-        SELECT pi.*, p.title as property_title
+        SELECT pi.*, p.title AS property_title
         FROM property_inquiries pi
         LEFT JOIN properties p ON pi.property_id = p.id
         ORDER BY pi.created_at DESC;
@@ -838,24 +909,31 @@ export async function getPropertyInquiries(): Promise<PropertyInquiry[]> {
         phone: r.phone ? String(r.phone) : null,
         message: String(r.message),
         status: r.status,
+        is_read: Boolean(r.is_read),
         created_at: new Date(r.created_at).toISOString(),
-        property_title: r.property_title ? String(r.property_title) : undefined,
+        property_title: r.property_title
+          ? String(r.property_title)
+          : undefined,
       }));
     } catch (error) {
       console.error('Error fetching inquiries from Neon:', error);
-      return [];
+      throw error;
     }
   }
 
-  const store = getMemoryStore();
-  return store.property_inquiries.map((inq) => {
-    const prop = store.properties.find((p) => p.id === inq.property_id);
+  return getMemoryStore().property_inquiries.map((inq) => {
+    const prop = getMemoryStore().properties.find(
+      (p) => p.id === inq.property_id
+    );
+
     return {
       ...inq,
+      is_read: Boolean(inq.is_read),
       property_title: prop?.title,
     };
   });
 }
+
 
 export async function createContactMessage(data: {
   name: string;
@@ -907,11 +985,16 @@ export async function createContactMessage(data: {
   return newMsg;
 }
 
+
 export async function getContactMessages(): Promise<ContactMessage[]> {
   const sql = getSql();
+
   if (sql) {
     try {
-      const rows = (await sql.query(`SELECT * FROM contact_messages ORDER BY created_at DESC;`)) as Record<string, any>[];
+      const rows = (await sql.query(
+        `SELECT * FROM contact_messages ORDER BY created_at DESC;`
+      )) as Record<string, any>[];
+
       return rows.map((r) => ({
         id: String(r.id),
         name: String(r.name),
@@ -920,16 +1003,18 @@ export async function getContactMessages(): Promise<ContactMessage[]> {
         subject: r.subject ? String(r.subject) : null,
         message: String(r.message),
         status: r.status,
+        is_read: Boolean(r.is_read),
         created_at: new Date(r.created_at).toISOString(),
       }));
     } catch (error) {
       console.error('Error fetching contact messages from Neon:', error);
-      return [];
+      throw error;
     }
   }
 
   return getMemoryStore().contact_messages;
 }
+
 
 // ----------------------------------------------------
 // TESTIMONIALS REPOSITORY
@@ -1148,4 +1233,59 @@ export async function deleteTestimonial(id: string): Promise<boolean> {
   const store = getMemoryStore();
   store.testimonials = store.testimonials.filter((t) => t.id !== id);
   return true;
+}
+// Paste it at the very bottom of lib/db.ts
+
+export async function deleteAgent(id: number | string) {
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error('DATABASE_URL is not set');
+  const sql = neon(url);
+  
+  await sql`DELETE FROM agents WHERE id = ${id}`;
+}
+// Toggles or marks property inquiry read status
+export async function togglePropertyInquiryRead(id: string | number, isRead: boolean) {
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error('DATABASE_URL is not set');
+  const sql = neon(url);
+
+  await sql`UPDATE property_inquiries SET is_read = ${isRead} WHERE id = ${id}`;
+}
+
+export async function toggleContactMessageRead(id: string | number, isRead: boolean) {
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error('DATABASE_URL is not set');
+  const sql = neon(url);
+
+  await sql`UPDATE contact_messages SET is_read = ${isRead} WHERE id = ${id}`;
+}
+
+export async function deletePropertyInquiry(id: string | number) {
+  const url = process.env.DATABASE_URL;
+
+  if (!url) {
+    const store = getMemoryStore();
+    store.property_inquiries = store.property_inquiries.filter(
+      (inquiry) => String(inquiry.id) !== String(id)
+    );
+    return;
+  }
+
+  const sql = neon(url);
+  await sql`DELETE FROM property_inquiries WHERE id = ${id}`;
+}
+
+export async function deleteContactMessage(id: string | number) {
+  const url = process.env.DATABASE_URL;
+
+  if (!url) {
+    const store = getMemoryStore();
+    store.contact_messages = store.contact_messages.filter(
+      (message) => String(message.id) !== String(id)
+    );
+    return;
+  }
+
+  const sql = neon(url);
+  await sql`DELETE FROM contact_messages WHERE id = ${id}`;
 }

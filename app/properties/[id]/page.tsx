@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import PropertyDetailsMapLoader from '@/components/property/PropertyDetailsMapLoader';
+
 import {
   Bed,
   Bath,
@@ -16,7 +18,7 @@ import { Footer } from '@/components/layout/Footer';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyInquiryForm } from '@/components/property/PropertyInquiryForm';
 import { AgentCard } from '@/components/property/AgentCard';
-import { formatCurrency, formatPropertyType } from '@/components/property/PropertyCard';
+import {formatPropertyType } from '@/components/property/PropertyCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AnimateIn } from '@/components/ui/animate-in';
@@ -43,7 +45,7 @@ export async function generateMetadata({
     title: `${property.title} | Aura Estates`,
     description:
       property.description?.slice(0, 160) ||
-      `Luxury ${formatPropertyType(property.property_type)} located in ${location}. Listed at ${formatCurrency(property.price)}.`,
+      `Luxury ${formatPropertyType(property.property_type)} located in ${location}. Listed at ${Number(property.price).toLocaleString('en-US')} ETB.`,
     openGraph: {
       title: `${property.title} | Aura Estates`,
       description: property.description?.slice(0, 160) || '',
@@ -85,11 +87,8 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
             </div>
 
             <div className="flex items-center gap-2">
-              <Link href={`/admin/properties/${property.id}/edit`}>
-                <Button variant="ghost" size="sm" className="h-7 text-xs text-zinc-600">
-                  Edit as Admin
-                </Button>
-              </Link>
+             
+             
             </div>
           </div>
         </div>
@@ -130,7 +129,7 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
                   Offered At
                 </span>
                 <span className="font-serif text-3xl sm:text-4xl font-bold text-zinc-950">
-                  {formatCurrency(property.price)}
+                 {Number(property.price).toLocaleString('en-US')} ETB
                 </span>
               </div>
             </div>
@@ -246,56 +245,24 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
               </AnimateIn>
 
               {/* Location & Coordinates Presentation */}
-              <AnimateIn direction="up" delay={0.3}>
-                <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-serif text-lg font-bold text-zinc-950">
-                      Location & Geographical Presentation
-                    </h2>
-                    {hasCoords && (
-                      <span className="inline-flex items-center gap-1 text-xs text-amber-700 font-medium">
-                        <Navigation className="h-3.5 w-3.5" />
-                        <span>GPS Coordinates Verified</span>
-                      </span>
-                    )}
-                  </div>
+            
+<AnimateIn direction="up" delay={0.3}>
+  <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <h2 className="mb-4 font-serif text-lg font-bold text-zinc-950">
+      Location & Geographical Presentation
+    </h2>
 
-                  <div className="space-y-3 text-sm text-zinc-600">
-                    {property.address && (
-                      <p>
-                        <strong>Street:</strong> {property.address}
-                      </p>
-                    )}
-                    <p>
-                      <strong>City & Region:</strong> {[property.city, property.state, property.zip_code].filter(Boolean).join(', ')}
-                    </p>
-                    {property.country && (
-                      <p>
-                        <strong>Country:</strong> {property.country}
-                      </p>
-                    )}
+   
+<PropertyDetailsMapLoader
+  latitude={property.latitude}
+  longitude={property.longitude}
+  title={property.title}
+  address={property.address}
+/>
 
-                    {/* Coordinates badge / card */}
-                    {hasCoords && (
-                      <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                          <span className="font-mono text-zinc-700">
-                            Latitude: {property.latitude} | Longitude: {property.longitude}
-                          </span>
-                          <a
-                            href={`https://www.google.com/maps/search/?api=1&query=${property.latitude},${property.longitude}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-amber-700 hover:underline font-semibold"
-                          >
-                            View in Google Maps ↗
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </AnimateIn>
+  </div>
+</AnimateIn>
+
             </div>
 
             {/* Right Column: Agent + Inquiry Form */}

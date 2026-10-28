@@ -11,7 +11,9 @@ const buttonVariants = cva(
         destructive: 'bg-rose-600 text-white shadow-sm hover:bg-rose-700',
         outline: 'border border-zinc-300 bg-white text-zinc-900 shadow-sm hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-800',
         secondary: 'bg-zinc-100 text-zinc-900 shadow-sm hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-700',
-        ghost: 'hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-50',
+       
+ghost: 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100',
+
         link: 'text-amber-600 underline-offset-4 hover:underline dark:text-amber-400',
         gold: 'bg-amber-600 text-white shadow-sm hover:bg-amber-700 active:bg-amber-800',
       },

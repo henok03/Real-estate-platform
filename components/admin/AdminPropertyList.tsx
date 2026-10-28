@@ -18,7 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency, formatPropertyType } from '@/components/property/PropertyCard';
+import {formatPropertyType } from '@/components/property/PropertyCard';
 import { archivePropertyAction, deletePropertyAction } from '@/lib/actions';
 import type { Property, PropertyType, PropertyStatus } from '@/types';
 
@@ -51,7 +51,26 @@ export function AdminPropertyList({ initialProperties }: AdminPropertyListProps)
     }
     return true;
   });
+function formatPropertyType(type: string): string {
+  const types: Record<string, string> = {
+    
+    single_family: "House",
+    villa: "Villa",
+    apartment: "Apartment",
+    condo: "Condominium",
+    condominium: "Condominium",
+    land: "Land / Plot",
+    commercial: "Commercial Property",
+    commercial_building: "Commercial Building",
+    office: "Office",
+    shop: "Shop",
+    building: "Whole Building",
+    townhouse: "Townhouse",
+    other: "Other",
+  };
 
+  return types[type] ?? "Other";
+}
   const handleArchiveConfirm = () => {
     if (!itemToArchive) return;
     startTransition(async () => {
@@ -127,15 +146,16 @@ export function AdminPropertyList({ initialProperties }: AdminPropertyListProps)
               className="flex h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
             >
               <option value="all">All Types</option>
-              <option value="single_family">Single Family</option>
-              <option value="villa">Villa</option>
-              <option value="condo">Condo</option>
-              <option value="apartment">Apartment</option>
-              <option value="townhouse">Townhouse</option>
-              <option value="land">Land</option>
-              <option value="commercial">Commercial</option>
-              <option value="office">Office</option>
-              <option value="other">Other</option>
+            <option value="single_family">House</option>
+<option value="villa">Villa</option>
+<option value="apartment">Apartment</option>
+<option value="condominium">Condominium</option>
+<option value="land">Land / Plot</option>
+<option value="commercial_building">Commercial Building</option>
+<option value="office">Office</option>
+<option value="shop">Shop</option>
+<option value="building">Whole Building</option>
+<option value="other">Other</option>
             </select>
           </div>
         </div>
@@ -150,7 +170,7 @@ export function AdminPropertyList({ initialProperties }: AdminPropertyListProps)
                 <tr>
                   <th className="py-3.5 px-4">Residence</th>
                   <th className="py-3.5 px-4">Price</th>
-                  <th className="py-3.5 px-4">Location</th>
+                 
                   <th className="py-3.5 px-4">Type</th>
                   <th className="py-3.5 px-4">Status</th>
                   <th className="py-3.5 px-4">Created</th>
@@ -193,19 +213,16 @@ export function AdminPropertyList({ initialProperties }: AdminPropertyListProps)
 
                     {/* Price */}
                     <td className="py-3 px-4 font-semibold text-zinc-900">
-                      {formatCurrency(property.price)}
+                      {Number(property.price).toLocaleString('en-US')} ETB
                     </td>
 
-                    {/* Location */}
-                    <td className="py-3 px-4 text-zinc-600">
-                      {[property.city, property.state].filter(Boolean).join(', ') || '—'}
-                    </td>
+                  
 
                     {/* Type */}
                     <td className="py-3 px-4">
-                      <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-700">
-                        {formatPropertyType(property.property_type)}
-                      </span>
+                     <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-700">
+  {formatPropertyType(property.property_type)}
+</span>
                     </td>
 
                     {/* Status */}
@@ -244,7 +261,7 @@ export function AdminPropertyList({ initialProperties }: AdminPropertyListProps)
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-zinc-600 hover:text-zinc-900"
+                            className="h-8 w-8 text-zinc-500 hover:text-zinc-900"
                             title="Edit Property"
                           >
                             <Edit className="h-4 w-4" />

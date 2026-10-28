@@ -18,7 +18,7 @@ import { HeroContent } from '@/components/hero/HeroContent';
 import { AnimateIn, MotionCard } from '@/components/ui/animate-in';
 import { Button } from '@/components/ui/button';
 import { getProperties, getPublishedTestimonials } from '@/lib/db';
-
+import { PublicTestimonialsSlider } from '@/components/testimonials/PublicTestimonialsSlider';
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
@@ -193,58 +193,8 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* TESTIMONIALS SECTION WITH ANIMATIONS */}
-        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <AnimateIn direction="up" className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-600">
-              Verified Client Experiences
-            </span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-zinc-950 mt-2">
-              Client Commendations
-            </h2>
-            <p className="mt-2 text-sm text-zinc-600">
-              Direct reviews from verified patrons, family offices, and architectural owners.
-            </p>
-          </AnimateIn>
-
-          {testimonials.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {testimonials.map((t, idx) => (
-                <AnimateIn key={t.id} delay={idx * 0.15} direction="up">
-                  <MotionCard className="h-full rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-amber-200">
-                    <div>
-                      <div className="flex gap-1 text-amber-500 mb-4">
-                        {Array.from({ length: t.rating ?? 5 }).map((_, i) => (
-                          <Star key={i} className="h-4 w-4 fill-amber-500 text-amber-500" />
-                        ))}
-                      </div>
-                      <p className="text-sm italic leading-relaxed text-zinc-700">
-                        &ldquo;{t.content}&rdquo;
-                      </p>
-                    </div>
-                    <div className="mt-6 border-t border-zinc-100 pt-4">
-                      <p className="font-serif font-bold text-zinc-950 text-sm">{t.client_name}</p>
-                      {t.client_title && (
-                        <p className="text-xs text-zinc-500">{t.client_title}</p>
-                      )}
-                    </div>
-                  </MotionCard>
-                </AnimateIn>
-              ))}
-            </div>
-          ) : (
-            <AnimateIn direction="up" delay={0.1}>
-              <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-500 max-w-xl mx-auto shadow-sm">
-                <p className="font-serif font-medium text-zinc-700">
-                  No published client reviews yet.
-                </p>
-                <p className="text-xs text-zinc-400 mt-1">
-                  Reviews stored in the <code className="text-zinc-600 font-mono">testimonials</code> database table with <code className="text-zinc-600 font-mono">is_published = true</code> will be rendered here.
-                </p>
-              </div>
-            </AnimateIn>
-          )}
-        </section>
+        
+<PublicTestimonialsSlider testimonials={testimonials} />
 
         {/* CTA BANNER WITH ANIMATION */}
         <section className="bg-zinc-900 text-white py-16 px-4 sm:px-6 lg:px-8">
@@ -264,7 +214,7 @@ export default async function HomePage() {
                   </Button>
                 </Link>
                 <Link href="/contact">
-                  <Button size="lg" variant="outline" className="border-zinc-700 text-white hover:bg-zinc-800 gap-2">
+                  <Button size="lg" variant="outline" className="border-zinc-700 text-white hover:bg-zinc-800 gap-2 hover:text-white">
                     <span>Speak With an Advisor</span>
                     <ArrowRight className="h-4 w-4" />
                   </Button>

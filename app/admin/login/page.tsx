@@ -61,8 +61,8 @@ export default function AdminLoginPage() {
                 id="admin-email"
                 name="email"
                 type="email"
-                placeholder="admin@auraestates.com"
-                defaultValue="admin@auraestates.com"
+                placeholder="example@auraestates.com"
+               
                 required
                 disabled={isPending}
                 className="bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-amber-500 pl-10"
@@ -82,8 +82,7 @@ export default function AdminLoginPage() {
                 id="admin-password"
                 name="password"
                 type="password"
-                placeholder="••••••••••••"
-                defaultValue="AdminPassword123!"
+               placeholder="Enter your master password"
                 required
                 disabled={isPending}
                 className="bg-zinc-950 border-zinc-800 text-white placeholder:text-zinc-600 focus-visible:ring-amber-500 pl-10"
@@ -112,21 +111,7 @@ export default function AdminLoginPage() {
         </form>
 
         {/* First time credentials notice */}
-        <div className="mt-8 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 p-4 text-xs text-zinc-400 space-y-1.5">
-          <div className="flex items-center gap-1.5 font-semibold text-amber-400">
-            <Info className="h-4 w-4 shrink-0" />
-            <span>Default Administrator Credentials</span>
-          </div>
-          <p className="text-[11px] leading-relaxed text-zinc-300">
-            Email: <code className="text-white font-mono bg-zinc-900 px-1 py-0.5 rounded">admin@auraestates.com</code>
-          </p>
-          <p className="text-[11px] leading-relaxed text-zinc-300">
-            Password: <code className="text-white font-mono bg-zinc-900 px-1 py-0.5 rounded">AdminPassword123!</code>
-          </p>
-          <p className="text-[10px] text-zinc-300 pt-1">
-            * You can securely change this password at any time in the <span className="text-zinc-200">/admin/security</span> section.
-          </p>
-        </div>
+     
 
         <div className="mt-6 text-center">
           <Link
